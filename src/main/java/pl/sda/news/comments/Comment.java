@@ -2,16 +2,26 @@ package pl.sda.news.comments;
 
 import java.time.LocalDateTime;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+@Entity
 public class Comment {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String autor;
     private String content;
     private LocalDateTime creationDate;
     private Long articleId;
 
-    public Comment(Long id, String autor, String content, LocalDateTime creationDate, Long articleId) {
-        this.id = id;
+    public Comment() {
+    }
+
+    public Comment(String autor, String content, LocalDateTime creationDate, Long articleId) {
         this.autor = autor;
         this.content = content;
         this.creationDate = creationDate;

@@ -1,29 +1,40 @@
 package pl.sda.news.comments;
 
-import static java.time.LocalDateTime.now;
-import static java.time.temporal.ChronoUnit.DAYS;
+import java.time.LocalDateTime;
 
-import java.util.Arrays;
-import java.util.List;
-
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
-@RestController
+@Controller
 public class CommentsController {
 
-    @GetMapping("/comments")
-    List<Comment> listComments() {
-        Comment c1 = new Comment(1L, "Jim Beam", "Super Fajnie",
-            now(), 1L);
+    private final CommentsRepository commentsRepository;
 
-        Comment c2 = new Comment(1L, "John Doe",
-            "Nie kumam",
-            now().minus(4, DAYS), 1L);
+    public CommentsController(CommentsRepository commentsRepository) {
+        this.commentsRepository = commentsRepository;
+    }
 
-        Comment c3 = new Comment(1L, "Bill Kill", "Yaiks",
-            now().minus(2, DAYS), 2L);
+    @GetMapping("/comments/{articleId}")
+    String listComments(@PathVariable Long articleId,  Model model) {
 
-        return Arrays.asList(c1, c2, c3);
+        model.addAttribute("comments", commentsRepository.findByArticleId(articleId));
+
+        return "/comments/list";
+    }
+
+    @PostMapping("/comments/{articleId}")
+    String addComment(@PathVariable Long articleId,
+                      @RequestParam String autor,
+                      @RequestParam String content,
+                      Model model) {
+        Comment comment = new Comment(autor, content, LocalDateTime.now(), articleId);
+        commentsRepository.save(comment);
+
+
+        return "redirect:/articles/"+articleId;
     }
 }

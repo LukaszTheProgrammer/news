@@ -8,7 +8,7 @@
 <h1>Articles</h1>
 <a href="/articles/add">Dodaj artykuł</a><br/>
 <c:forEach var="article" items="${articles}">
-    <div>${article.title} - ${article.publishDate}</div>
+    <div>${article.title} - ${article.publishDate} - <a href ="/articles/${article.id}">View</a></div>
 </c:forEach>
 </body>
 </html>
