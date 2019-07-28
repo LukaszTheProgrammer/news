@@ -2,16 +2,29 @@ package pl.sda.news.articles;
 
 import java.time.LocalDateTime;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+@Entity
 public class Article {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String title;
+
+    @Column(length = 2048)
     private String content;
     private LocalDateTime publishDate;
 
-    public Article(Long id, String title, String content,
+    public Article() {
+    }
+
+    public Article(String title, String content,
                    LocalDateTime publishDate) {
-        this.id = id;
         this.title = title;
         this.content = content;
         this.publishDate = publishDate;

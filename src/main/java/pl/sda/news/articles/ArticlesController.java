@@ -1,35 +1,27 @@
 package pl.sda.news.articles;
 
-import static java.time.LocalDateTime.now;
-
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class ArticlesController {
 
-    private final static Map<Long, Article> articleRepo = new HashMap<>();
+    private final ArticleRepository articleRepository;
 
-    static {
-        Article a1 = new Article(1L, "Marsz równości", "...", now());
-        Article a2 = new Article(2L, "Grafen wciąż nierentowny", "...",
-            now().minus(2, ChronoUnit.DAYS));
-        articleRepo.put(a1.getId(), a1);
-        articleRepo.put(a2.getId(), a2);
+    public ArticlesController(ArticleRepository articleRepository) {
+        this.articleRepository = articleRepository;
     }
 
     @GetMapping("/articles")
     String list(Model model) {
-        model.addAttribute("articles", articleRepo.values());
+        model.addAttribute("articles", articleRepository.findAll());
 
         return "article/list";
     }
@@ -37,16 +29,12 @@ public class ArticlesController {
     @PostMapping(value = "/articles"
         , consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     String createArticle(@RequestParam String title,
-                          @RequestParam String content) {
-        Long nextId = articleRepo.keySet().stream()
-            .max(Long::compareTo)
-            .map(maxId -> maxId + 1)
-            .orElse(1L);
+                         @RequestParam String content) {
 
-        Article article = new Article(nextId, title,
+        Article article = new Article(title,
             content, LocalDateTime.now());
 
-        articleRepo.put(article.getId(), article);
+        articleRepository.save(article);
 
         return "redirect:/articles";
     }
@@ -55,5 +43,15 @@ public class ArticlesController {
     String addArticleForm() {
 
         return "article/form";
+    }
+
+    @GetMapping("/articles/{id}")
+    String displayArticle(@PathVariable Long id, Model model) {
+        Article article = articleRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Article not found"));
+
+        model.addAttribute("article", article);
+
+        return "article/details";
     }
 }
